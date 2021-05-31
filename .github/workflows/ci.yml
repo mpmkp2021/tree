@@ -87,7 +87,7 @@ jobs:
           python -m pip install pytest && \
           python -m pip install -r requirements-test.txt && \
           python -VV && \
-          yum install -y wget && \
+          yum install wget && \
           wget -O bazel https://github.com/bazelbuild/bazel/releases/download/4.1.0/bazel-4.1.0-linux-arm64 && \
           chmod +x bazel && \
           mv bazel /us/local/bin/ && \
