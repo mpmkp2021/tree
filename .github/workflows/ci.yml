@@ -61,3 +61,41 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'release' && github.event.action == 'created') }}
         with:
           path: dist/dm-tree*.tar.gz
+  build-aarch64:
+    name: "Build wheel ${{ matrix.pyver }} aarch64"
+    strategy:
+      matrix:
+        pyver: [cp36-cp36m, cp37-cp37m, cp38-cp38, cp39-cp39]
+        arch: [aarch64]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    env:
+      py: /opt/python/${{ matrix.pyver }}/bin/python
+      img: quay.io/pypa/manylinux2014_${{ matrix.arch }}
+    steps:
+    - uses: "actions/checkout@v2"
+    - name: Set up QEMU
+      id: qemu
+      uses: docker/setup-qemu-action@v1
+    - name: "Build wheel"
+      run: |
+        docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+          ${{ env.img }} \
+          bash -exc '${{ env.py }} -m pip install virtualenv && ${{ env.py }} -m venv .env && \
+          source .env/bin/activate && \
+          python -m pip install --upgrade pip setuptools wheel && \
+          python -m pip install pytest && \
+          python -m pip install -r requirements-test.txt && \
+          python -VV && \
+          python setup.py sdist && \
+          pip wheel --verbose --no-deps --no-clean dist/dm-tree*.tar.gz && \
+          pip install dm_tree*.whl && \
+          mkdir tests && pushd tests && \
+          python -m pytest -vv --pyargs tree && \
+          popd && \
+          deactivate'
+    - uses: actions/upload-artifact@v2
+      if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'release' && github.event.action == 'created') }}
+      with:
+        path: dm_tree*.whl
+          
