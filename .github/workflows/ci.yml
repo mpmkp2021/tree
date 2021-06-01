@@ -92,7 +92,8 @@ jobs:
           chmod +x bazel-linux-arm64 && \
           mv bazel-linux-arm64 /usr/bin/bazel && \
           file /usr/bin/bazel && \
-          sudo bazel version && \
+          export PATH=/usr/bin/bazel:$PATH
+          bazel version && \
           bazel info release && \
           python setup.py sdist && \
           pip wheel --verbose --no-deps --no-clean dist/dm-tree*.tar.gz && \
@@ -105,4 +106,35 @@ jobs:
       if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'release' && github.event.action == 'created') }}
       with:
         path: dm_tree*.whl
-          
+  run_aarch64:
+    runs-on: ubuntu-20.04
+    name: Build on ${{ matrix.distro }} ${{ matrix.arch }}
+    strategy:
+      matrix:
+        include:
+          - arch: aarch64
+            distro: ubuntu20.04
+    steps:
+      - uses: actions/checkout@v2.1.0
+      - uses: uraimo/run-on-arch-action@v2.0.5
+        name: Build artifact
+        id: build
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+          dockerRunArgs: |
+            --volume "${PWD}/artifacts:/artifacts"
+          env: | # YAML, but pipe character is necessary
+            artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
+          shell: /bin/sh
+          run: |
+            uname -m
+            apt-get install -y wget
+            wget -O "bazel-linux-arm64" "https://github.com/bazelbuild/bazel/releases/download/${version}/bazel-${version}-${platform}-arm64"
+            chmod +x bazel-linux-arm64
+            mv bazel-linux-arm64 /usr/local/bin/bazel
+            file /usr/local/bin/bazel
+            bazel version
+            bazel info release
