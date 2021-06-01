@@ -17,8 +17,8 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9"]
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        python-version: ["3.6"]
+        os: [ubuntu-latest]
 
     steps:
       - uses: "actions/checkout@v2"
@@ -132,7 +132,7 @@ jobs:
           run: |
             uname -m
             apt-get update -q -y
-            apt-get install -y wget
+            apt-get install -y wget file
             wget -O "bazel-linux-arm64" "https://github.com/bazelbuild/bazel/releases/download/3.6.0/bazel-3.6.0-linux-arm64"
             chmod +x bazel-linux-arm64
             mv bazel-linux-arm64 /usr/local/bin/bazel
