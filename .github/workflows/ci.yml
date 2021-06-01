@@ -87,12 +87,12 @@ jobs:
           python -m pip install pytest && \
           python -m pip install -r requirements-test.txt && \
           python -VV && \
-          yum -y install wget && \
+          yum -y install wget sudo && \
           wget -O "bazel-linux-arm64" "https://github.com/bazelbuild/bazel/releases/download/3.6.0/bazel-3.6.0-linux-arm64" && \
           chmod +x bazel-linux-arm64 && \
           mv bazel-linux-arm64 /usr/bin/bazel && \
           file /usr/bin/bazel && \
-          bazel version && \
+          sudo bazel version && \
           bazel info release && \
           python setup.py sdist && \
           pip wheel --verbose --no-deps --no-clean dist/dm-tree*.tar.gz && \
